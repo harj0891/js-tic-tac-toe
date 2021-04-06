@@ -50,9 +50,9 @@ let DisplayController = (function () {
     
         // create a new grid and row per array element
         for (let i=0; i < currentGridArray.length; i++) {
-            let row = document.createElement("section");
-            row.setAttribute("id",`row-${i}`)
-            row.setAttribute("class","row");
+            let col = document.createElement("section");
+            col.setAttribute("id",`col-${i}`)
+            col.setAttribute("class","col");
     
             for (let j=0; j < currentGridArray[i].length; j++) {
                 let item = document.createElement("section");
@@ -67,12 +67,12 @@ let DisplayController = (function () {
                 itemText.textContent = currentGridArray[i][j];
                 item.appendChild(itemText);
 
-                // append to row
-                row.appendChild(item);
+                // append to column
+                col.appendChild(item);
                 
             }
             
-            gameGridContainer.appendChild(row);
+            gameGridContainer.appendChild(col);
             
         }
     }

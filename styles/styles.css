@@ -4,26 +4,37 @@
     padding: 0;
 }
 
-.grid {
-    display:grid;
-    background-color:cadetblue;
-    grid-template-columns: repeat(3, 1fr);
+body {
+    background-color: rgb(216, 216, 216);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.heading{
     margin: auto;
     margin-top: 50px;
-    width: 600px;
+    font-size: 4rem;
+    text-align: center;
+    
+}
+
+.grid {
+    display:grid;
+    background-color:rgb(104, 230, 198);
+    grid-template-columns: repeat(3, 1fr);
+    margin: auto;
+    margin-top: 100px;
+    width: 400px;
 }
 
 
 .item {
     border: 1px black solid;
-    width:200px;
-    height:200px;
+    color:rgb(18, 39, 34);
+    font-weight: bold;
+    font-size: 8rem;
+    height:133px;
+    line-height: 110px;
+    text-align: center;
+    /* width:200px; */
 }
 
-.item p {
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: bold;
-    font-size: 5rem;
-    text-align: center;
-    line-height: 200px;
-}

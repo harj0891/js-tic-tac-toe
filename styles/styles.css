@@ -1,22 +1,29 @@
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 .grid {
-    position: relative;
-    top:100px;
-    left:100px;
-
+    display:grid;
+    background-color:cadetblue;
+    grid-template-columns: repeat(3, 1fr);
+    margin: auto;
+    margin-top: 50px;
+    width: 600px;
 }
 
-.row {
-    display: block;
-    padding: 20px;
-    
-}
 
 .item {
-    display: inline;
-    padding: 20px;    
     border: 1px black solid;
+    width:200px;
+    height:200px;
+}
+
+.item p {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    font-size: 5rem;
+    text-align: center;
+    line-height: 200px;
 }

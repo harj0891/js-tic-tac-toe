@@ -56,15 +56,17 @@ let DisplayController = (function () {
     
             for (let j=0; j < currentGridArray[i].length; j++) {
                 let item = document.createElement("section");
+                let itemText = document.createElement("p");
                 item.setAttribute("id",`item-${i}-${j}`)
                 item.setAttribute("data-id",`${i}${j}`)
                 item.setAttribute("class","item");
-                item.addEventListener("click", function() {       
-                    updateCell(item);
+                item.addEventListener("click", function() {     
+                    updateCell(item, itemText);
                 })
                 
-                item.textContent = currentGridArray[i][j];
-                
+                itemText.textContent = currentGridArray[i][j];
+                item.appendChild(itemText);
+
                 // append to row
                 row.appendChild(item);
                 
@@ -74,13 +76,16 @@ let DisplayController = (function () {
             
         }
     }
-    function updateCell(item) {
+    function updateCell(item, itemText) {
         let itemIdX = item.getAttribute("data-id").split("")[0];
         let itemIdY = item.getAttribute("data-id").split("")[1];
+        
+
         let cellUpdated = GameBoard.setCell(itemIdX, itemIdY,'x');
 
         if (cellUpdated) {
-            item.textContent = GameBoard.gameBoard[itemIdX][itemIdY];
+            
+            itemText.textContent = GameBoard.gameBoard[itemIdX][itemIdY];
 
         } else {
             console.log ("cell already occupied");

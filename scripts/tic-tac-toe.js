@@ -22,15 +22,19 @@ let Player = (name, mark) => {
 let GameBoard = (function () {
     'use strict';
     let gameBoard = [
-                            ['1','2','3'],
-                            ['4','5','6'],
-                            ['7','','9']
+                            ['','',''],
+                            ['','',''],
+                            ['','','']
                         ]
-    function setCell([x, y], mark) {
+    function setCell(x, y, mark) {
+        console.log(gameBoard[x][y]);
+        console.log(x, y);
         if (gameBoard[x][y] == '') {
             gameBoard[x][y] = mark;
+            return true;
         } else {
-            return "Cell is not empty";
+            
+            return false;
         }
         
     }
@@ -48,12 +52,15 @@ let DisplayController = (function () {
         for (let i=0; i < currentGridArray.length; i++) {
             let row = document.createElement("section");
             row.setAttribute("id",`row-${i}`)
+            row.setAttribute("class","row");
     
             for (let j=0; j < currentGridArray[i].length; j++) {
                 let item = document.createElement("section");
                 item.setAttribute("id",`item-${i}-${j}`)
-                item.addEventListener("click", function() {
-                    //GameBoard.setCell
+                item.setAttribute("data-id",`${i}${j}`)
+                item.setAttribute("class","item");
+                item.addEventListener("click", function() {       
+                    updateCell(item);
                 })
                 
                 item.textContent = currentGridArray[i][j];
@@ -67,7 +74,19 @@ let DisplayController = (function () {
             
         }
     }
+    function updateCell(item) {
+        let itemIdX = item.getAttribute("data-id").split("")[0];
+        let itemIdY = item.getAttribute("data-id").split("")[1];
+        let cellUpdated = GameBoard.setCell(itemIdX, itemIdY,'x');
 
+        if (cellUpdated) {
+            item.textContent = GameBoard.gameBoard[itemIdX][itemIdY];
+
+        } else {
+            console.log ("cell already occupied");
+        }
+
+    }
 
     return {displayGrid}
 })();

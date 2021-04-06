@@ -1,0 +1,22 @@
+* {
+    box-sizing: border-box;
+}
+
+.grid {
+    position: relative;
+    top:100px;
+    left:100px;
+
+}
+
+.row {
+    display: block;
+    padding: 20px;
+    
+}
+
+.item {
+    display: inline;
+    padding: 20px;    
+    border: 1px black solid;
+}

@@ -19,7 +19,8 @@ body {
 
 .grid {
     display:grid;
-    background-color:rgb(104, 230, 198);
+    /* background-color:rgb(104, 230, 198); */
+    background-color:rgb(255, 255, 255);
     grid-template-columns: repeat(3, 1fr);
     margin: auto;
     margin-top: 100px;
@@ -29,15 +30,40 @@ body {
 
 .item {
     border: 1px black solid;
-    color:rgb(18, 39, 34);
     font-weight: bold;
     font-size: 8rem;
     height:133px;
     line-height: 110px;
     text-align: center;
-    /* width:200px; */
 }
 
-.item-win {
-    color:rgb(224, 0, 0);
+.val-x {
+    color:rgb(0, 15, 148);
+}
+
+.val-o {
+    color:rgb(10, 119, 0);    
+}
+
+.val-default {
+    color:rgb(85, 85, 85);
+}
+
+.val-win {
+    color:rgb(161, 0, 0); 
+}
+
+.controls {
+    margin-top: 50px;
+    text-align: center;
+}
+
+.controls-restart {
+    border: 1px black solid;
+    font-size: 1.3rem;
+    width: 175px;
+}
+
+.controls-restart:hover {
+    background-color:rgb(218, 218, 218);
 }

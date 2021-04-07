@@ -46,11 +46,100 @@ let GameBoard = (function () {
                 gameBoard[i][j] = '';
             }
         }
-
-        console.log(gameBoard);
     }
     return {setCell, getBoard, setBoard, resetBoard}
 })();
+
+
+
+
+let DisplayController = (function () {
+    let gameGridContainer = document.querySelector("#game-grid");
+    let currentGridArray = GameBoard.getBoard();
+
+
+    function displayPlayers(player1, player2) {
+        let playersContainer = document.querySelector("#players-info");
+
+        let player1Element = document.createElement("p");
+        player1Element.setAttribute("class", "player1");
+        player1Element.textContent = `${player1.getName()}: ${player1.getMark()}`;
+        playersContainer.appendChild(player1Element);
+
+        let player2Element = document.createElement("p");
+        player2Element.setAttribute("class", "player2");      
+        player2Element.textContent = `${player2.getName()}: ${player2.getMark()}`;
+        playersContainer.appendChild(player2Element);
+    }
+
+    function displayGrid() {
+        // reset existing
+        gameGridContainer.innerHTML = "";
+
+        // create a new grid and row per array element
+        for (let i=0; i < currentGridArray.length; i++) {
+            for (let j=0; j < currentGridArray[i].length; j++) {
+                let item = document.createElement("section");
+                let itemValue = document.createElement("p");
+                itemValue.setAttribute("id",`val-${i}-${j}`)
+                itemValue.setAttribute("class","value");
+
+                item.setAttribute("id",`item-${i}-${j}`)
+                item.setAttribute("data-id",`${i}${j}`)
+                item.setAttribute("class","item");
+                item.addEventListener("click", function() {     
+                    Game.playTurn(item, itemValue);
+                })
+                
+                itemValue.textContent = currentGridArray[i][j];
+                item.appendChild(itemValue);
+
+                // append to grid
+                gameGridContainer.appendChild(item);
+
+                // add event listener on reset button
+                let restartButton = document.querySelector("#restart");
+                restartButton.addEventListener("click", function() {
+                    Game.restartGame();
+                });
+                
+            }     
+
+        }
+    }
+
+    function displayCell(itemValue,itemIdX,itemIdY) {
+        itemValue.setAttribute("class",`value val-${currentGridArray[itemIdX][itemIdY]}`);
+        itemValue.textContent = currentGridArray[itemIdX][itemIdY];
+    }
+
+    function displayResult(winnerName, winningRow) {
+        if (winningRow == "tie") {
+            console.log("it is a tie");
+        } else {
+            // set all to default colour
+            let allValues = document.querySelectorAll(".value");
+
+
+            allValues.forEach(value => {
+                value.setAttribute("class","val-default");
+            })
+
+            // set winning row
+            for (let i=0; i < winningRow.length; i++) {
+                let x = winningRow[i][0];
+                let y = winningRow[i][1];
+                let winningVal = document.querySelector(`#val-${x}-${y}`);
+                winningVal.setAttribute("class","val-win");
+            }
+    
+            console.log(`${winnerName} has won`);
+        }
+    }
+
+    return {displayPlayers, displayGrid, displayCell, displayResult}
+})();
+
 
 let Game = (function () {
     'use strict';    
@@ -58,6 +147,13 @@ let Game = (function () {
     let player2 = Player("Player 2", "o");
     let currentPlayer = player1;
     
+    startGame();
+
+    function startGame() {
+        DisplayController.displayPlayers(player1, player2);
+        DisplayController.displayGrid();
+    }
+
     function playTurn(item, itemText) {
         let playerMark = currentPlayer.getMark();
         let playerName = currentPlayer.getMark();
@@ -152,73 +248,3 @@ let Game = (function () {
     return {playTurn, restartGame}
 })();
 
-
-
-let DisplayController = (function () {
-    let gameGridContainer = document.querySelector("#game-grid");
-    let currentGridArray = GameBoard.getBoard();
-    let restartButton = document.querySelector("#restart");
-    restartButton.addEventListener("click", Game.restartGame);
-
-    displayGrid();
-
-    function displayGrid() {
-        // reset existing
-        gameGridContainer.innerHTML = "";
-
-        // create a new grid and row per array element
-        for (let i=0; i < currentGridArray.length; i++) {
-            for (let j=0; j < currentGridArray[i].length; j++) {
-                let item = document.createElement("section");
-                let itemValue = document.createElement("p");
-                itemValue.setAttribute("id",`val-${i}-${j}`)
-                itemValue.setAttribute("class","value");
-
-                item.setAttribute("id",`item-${i}-${j}`)
-                item.setAttribute("data-id",`${i}${j}`)
-                item.setAttribute("class","item");
-                item.addEventListener("click", function() {     
-                    Game.playTurn(item, itemValue);
-                })
-                
-                itemValue.textContent = currentGridArray[i][j];
-                item.appendChild(itemValue);
-
-                // append to grid
-                gameGridContainer.appendChild(item);
-                
-            }     
-        }
-    }
-
-    function displayCell(itemValue,itemIdX,itemIdY) {
-        itemValue.setAttribute("class",`value val-${currentGridArray[itemIdX][itemIdY]}`);
-        itemValue.textContent = currentGridArray[itemIdX][itemIdY];
-    }
-
-    function displayResult(winnerName, winningRow) {
-        if (winningRow == "tie") {
-            console.log("it is a tie");
-        } else {
-            // set all to default colour
-            let allValues = document.querySelectorAll(".value");
-
-
-            allValues.forEach(value => {
-                value.setAttribute("class","val-default");
-            })
-
-            // set winning row
-            for (let i=0; i < winningRow.length; i++) {
-                let x = winningRow[i][0];
-                let y = winningRow[i][1];
-                let winningVal = document.querySelector(`#val-${x}-${y}`);
-                winningVal.setAttribute("class","val-win");
-            }
-    
-            console.log(`${winnerName} has won`);
-        }
-    }
-
-    return {displayGrid, displayCell, displayResult}
-})();

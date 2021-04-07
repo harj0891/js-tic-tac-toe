@@ -54,27 +54,63 @@ let GameBoard = (function () {
 
 
 let DisplayController = (function () {
+    let resultModalContainer = document.querySelector("#game-result-modal");
+    let playersContainer = document.querySelector("#players-info");
     let gameGridContainer = document.querySelector("#game-grid");
     let currentGridArray = GameBoard.getBoard();
+    let resultModal =  document.querySelector("#game-result-value");
+    
+    // add event listener on reset button
+    let restartButtonMain = document.querySelector("#restart");
+    restartButtonMain.addEventListener("click",function(){
+        console.log("game restart clicked");
+        Game.restartGame();
+    });
 
+    // add event listener on reset button
+    let restartButtonModal = document.querySelector("#modal-restart");
+    restartButtonModal.addEventListener("click",function(){
+        console.log("game restart clicked");
+        Game.restartGame();
+    });
 
     function displayPlayers(player1, player2) {
-        let playersContainer = document.querySelector("#players-info");
+        // reset existing
+        playersContainer.innerHTML = "";
 
         let player1Element = document.createElement("p");
-        player1Element.setAttribute("class", "player1");
-        player1Element.textContent = `${player1.getName()}: ${player1.getMark()}`;
+        player1Element.setAttribute("class", "player1 player-focus");
+        player1Element.textContent = `${player1.getName()}`;
         playersContainer.appendChild(player1Element);
 
         let player2Element = document.createElement("p");
         player2Element.setAttribute("class", "player2");      
-        player2Element.textContent = `${player2.getName()}: ${player2.getMark()}`;
+        player2Element.textContent = `${player2.getName()}`;
         playersContainer.appendChild(player2Element);
     }
 
+    function setPlayerFocus(player) {
+        let currentPlayerElement;
+        let otherPlayerElement;
+
+        if (player.getName() == "Player 1") {
+            currentPlayerElement = document.querySelector(".player1");
+            otherPlayerElement = document.querySelector(".player2");
+        } else if (player.getName() == "Player 2") {
+            currentPlayerElement = document.querySelector(".player2");
+            otherPlayerElement = document.querySelector(".player1");
+        }
+
+        currentPlayerElement.classList.add("player-focus");
+        otherPlayerElement.classList.remove("player-focus");
+    }
+
     function displayGrid() {
-        // reset existing
+        // reset existing results and game grid
+        resultModalContainer.style.display = "none";
+        resultModal.innerHTML = "";
         gameGridContainer.innerHTML = "";
+        
 
         // create a new grid and row per array element
         for (let i=0; i < currentGridArray.length; i++) {
@@ -95,18 +131,12 @@ let DisplayController = (function () {
                 item.appendChild(itemValue);
 
                 // append to grid
-                gameGridContainer.appendChild(item);
-
-                // add event listener on reset button
-                let restartButton = document.querySelector("#restart");
-                restartButton.addEventListener("click", function() {
-                    Game.restartGame();
-                });
-                
-            }     
-
+                gameGridContainer.appendChild(item);                
+            } 
         }
     }
+
+
 
     function displayCell(itemValue,itemIdX,itemIdY) {
         itemValue.setAttribute("class",`value val-${currentGridArray[itemIdX][itemIdY]}`);
@@ -114,12 +144,13 @@ let DisplayController = (function () {
     }
 
     function displayResult(winnerName, winningRow) {
+        let resultElement = document.createElement("p");
+
         if (winningRow == "tie") {
-            console.log("it is a tie");
+            resultElement.textContent = "It is a tie!";
         } else {
             // set all to default colour
             let allValues = document.querySelectorAll(".value");
-
 
             allValues.forEach(value => {
                 value.setAttribute("class","val-default");
@@ -133,11 +164,14 @@ let DisplayController = (function () {
                 winningVal.setAttribute("class","val-win");
             }
     
-            console.log(`${winnerName} has won`);
+            resultElement.textContent = `${winnerName} has won!`;
         }
+
+        resultModal.appendChild(resultElement);
+        resultModalContainer.style.display = "block";
     }
 
-    return {displayPlayers, displayGrid, displayCell, displayResult}
+    return {displayPlayers, setPlayerFocus, displayGrid, displayCell, displayResult}
 })();
 
 
@@ -156,7 +190,7 @@ let Game = (function () {
 
     function playTurn(item, itemText) {
         let playerMark = currentPlayer.getMark();
-        let playerName = currentPlayer.getMark();
+        let playerName = currentPlayer.getName();
         let winningRow = checkWinner(playerMark);
         
         if (winningRow) {
@@ -177,9 +211,12 @@ let Game = (function () {
                 DisplayController.displayResult(playerName,winningRow);                
             } else {
                 if (gameBoardUpdated && currentPlayer == player1) {
+                    
                     currentPlayer = player2;
+                    DisplayController.setPlayerFocus(currentPlayer);
                 } else if (gameBoardUpdated && currentPlayer == player2) {
                     currentPlayer = player1;
+                    DisplayController.setPlayerFocus(currentPlayer);
                 }    
             }
             
@@ -204,7 +241,7 @@ let Game = (function () {
         if (currentGridArray[0][0] == mark && currentGridArray[1][0] == mark && currentGridArray[2][0] == mark) {
             return [[0,0],[1,0],[2,0]];
         } else if (currentGridArray[0][1] == mark && currentGridArray[1][1] == mark && currentGridArray[2][1] == mark) {
-            return [[0,1],[1,1],[2,2]];
+            return [[0,1],[1,1],[2,1]];
         } else if (currentGridArray[0][2] == mark && currentGridArray[1][2] == mark && currentGridArray[2][2] == mark) {
             return [[0,2],[1,2],[2,2]];
         } 
@@ -242,6 +279,9 @@ let Game = (function () {
 
     function restartGame() {
         GameBoard.resetBoard();
+        currentPlayer = player1;
+
+        DisplayController.displayPlayers(player1, player2);
         DisplayController.displayGrid();
     }
 

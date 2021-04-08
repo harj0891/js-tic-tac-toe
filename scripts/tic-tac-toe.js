@@ -1,7 +1,15 @@
+
+const opponentType = "cpu";
+
+
 // Player factory
-let Player = (name, mark) => {
+let Player = (id, name, mark) => {
+    this.id = id;
     this.name = name;
     this.mark = mark;
+    getID = function() {
+        return id;
+    }
     getName = function () {
         return name;
     }
@@ -9,7 +17,39 @@ let Player = (name, mark) => {
         return mark;
     }
     
-    return {getName, getMark};
+    return {getID, getName, getMark};
+}
+
+// Player CPU factory
+let PlayerCPU = (id, name, mark, difficulty) => {
+    const prototype = Player (id, name, mark);
+
+    let makeMove = function () {
+        let gameBoard = GameBoard.getBoard();
+
+        if (difficulty == "easy") {
+            let availableMoves = [];
+
+            for (let i=0; i < gameBoard.length; i++) {
+                for (let j=0; j < gameBoard[i].length; j++) {
+                    if (gameBoard[i][j] == '') {
+                        availableMoves.push([i,j]);
+                    }
+                }
+            }
+
+            let randomNum = Math.floor(Math.random() * availableMoves.length);
+            let selectRandomMove = availableMoves[randomNum];
+
+            return selectRandomMove;
+
+        } else if (difficulty == "hard") {
+
+        }
+        
+    }
+
+    return Object.assign({}, prototype, {makeMove});
 }
 
 // Game modules
@@ -63,14 +103,12 @@ let DisplayController = (function () {
     // add event listener on reset button
     let restartButtonMain = document.querySelector("#restart");
     restartButtonMain.addEventListener("click",function(){
-        console.log("game restart clicked");
         Game.restartGame();
     });
 
     // add event listener on reset button
     let restartButtonModal = document.querySelector("#modal-restart");
     restartButtonModal.addEventListener("click",function(){
-        console.log("game restart clicked");
         Game.restartGame();
     });
 
@@ -93,10 +131,10 @@ let DisplayController = (function () {
         let currentPlayerElement;
         let otherPlayerElement;
 
-        if (player.getName() == "Player 1") {
+        if (player.getID() == 1) {
             currentPlayerElement = document.querySelector(".player1");
             otherPlayerElement = document.querySelector(".player2");
-        } else if (player.getName() == "Player 2") {
+        } else if (player.getID() == 2) {
             currentPlayerElement = document.querySelector(".player2");
             otherPlayerElement = document.querySelector(".player1");
         }
@@ -123,8 +161,12 @@ let DisplayController = (function () {
                 item.setAttribute("id",`item-${i}-${j}`)
                 item.setAttribute("data-id",`${i}${j}`)
                 item.setAttribute("class","item");
-                item.addEventListener("click", function() {     
-                    Game.playTurn(item, itemValue);
+                item.addEventListener("click", function() {
+                    
+                    let turnInProgress = Game.isTurnInProgress();
+                    if (!turnInProgress) {
+                        Game.playTurn(item, itemValue);
+                    }
                 })
                 
                 itemValue.textContent = currentGridArray[i][j];
@@ -177,51 +219,103 @@ let DisplayController = (function () {
 
 let Game = (function () {
     'use strict';    
-    let player1 = Player("Player 1", "x");
-    let player2 = Player("Player 2", "o");
-    let currentPlayer = player1;
+    let player1;
+    let player2;
+    let currentPlayer;
+    let turnInProgress;
     
-    startGame();
+    startGame(opponentType);
 
-    function startGame() {
+
+    function isTurnInProgress () {
+        return turnInProgress;
+    };
+
+    function startGame(opponentType) {
+        // setup players
+        player1 = Player(1, "Player 1", "x");
+
+        if (opponentType == "player") {
+            player2 = Player(2, "Player 2", "o");
+        } else if (opponentType == "cpu") {
+            player2 = PlayerCPU(2, "CPU (Easy)", "o","easy");
+        }
+
+        currentPlayer = player1;
+        turnInProgress = false;
+
+        // setup display
         DisplayController.displayPlayers(player1, player2);
         DisplayController.displayGrid();
     }
 
+    function playCPUTurn() {
+        let playerMove = player2.makeMove();
+
+        // get grid item and pass into playTurn function
+        let x = playerMove[0];
+        let y = playerMove[1];
+        let item = document.querySelector(`#item-${x}-${y}`);
+        let itemText = document.querySelector(`#val-${x}-${y}`);
+
+        
+        return playTurn(item, itemText);
+    }
+
     function playTurn(item, itemText) {
+        turnInProgress = true;
+
+        let delayInMilliseconds = 1000; 
         let playerMark = currentPlayer.getMark();
         let playerName = currentPlayer.getName();
         let winningRow = checkWinner(playerMark);
-        
+
+        // check for winner
         if (winningRow) {
-            DisplayController.displayResult(playerName,winningRow);
-
-        } else {
-            let itemIdX = item.getAttribute("data-id").split("")[0];
-            let itemIdY = item.getAttribute("data-id").split("")[1];
-
-            // update game cell and display
-            let gameBoardUpdated = GameBoard.setCell(itemIdX, itemIdY,playerMark);
-            DisplayController.displayCell(itemText,itemIdX,itemIdY)
-
-            // check winner
-            winningRow = checkWinner(playerMark);
-
-            if (winningRow) {
-                DisplayController.displayResult(playerName,winningRow);                
-            } else {
-                if (gameBoardUpdated && currentPlayer == player1) {
-                    
-                    currentPlayer = player2;
-                    DisplayController.setPlayerFocus(currentPlayer);
-                } else if (gameBoardUpdated && currentPlayer == player2) {
-                    currentPlayer = player1;
-                    DisplayController.setPlayerFocus(currentPlayer);
-                }    
-            }
-            
+            return DisplayController.displayResult(playerName,winningRow);                
         }
+       
 
+        // make move - update game cell and display       
+        let itemIdX = item.getAttribute("data-id").split("")[0];
+        let itemIdY = item.getAttribute("data-id").split("")[1];
+        GameBoard.setCell(itemIdX, itemIdY,playerMark);
+        DisplayController.displayCell(itemText,itemIdX,itemIdY)
+
+        // check for winner after making move
+        winningRow = checkWinner(playerMark);
+        if (winningRow) {
+            return DisplayController.displayResult(playerName,winningRow);                
+        } 
+            
+        
+        // switch player turn
+        if (currentPlayer == player1) {
+            
+            //set to player 2
+            currentPlayer = player2;
+            DisplayController.setPlayerFocus(currentPlayer);
+
+            // cpu play turn
+            if (opponentType == "cpu") {
+                setTimeout(function() {
+                    playCPUTurn();
+                    // finish turn
+                    turnInProgress = false;
+                }, delayInMilliseconds);
+            } else {
+                // finish turn
+                turnInProgress = false;
+            }
+
+        } else if (currentPlayer == player2) {
+            //set to player 1
+            currentPlayer = player1;
+            DisplayController.setPlayerFocus(currentPlayer);
+            
+            // finish turn
+            turnInProgress = false;
+        }                
 
     }
 
@@ -279,12 +373,8 @@ let Game = (function () {
 
     function restartGame() {
         GameBoard.resetBoard();
-        currentPlayer = player1;
-
-        DisplayController.displayPlayers(player1, player2);
-        DisplayController.displayGrid();
+        startGame(opponentType);
     }
 
-    return {playTurn, restartGame}
+    return {isTurnInProgress, playTurn, restartGame}
 })();
-

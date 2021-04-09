@@ -24,30 +24,72 @@ let Player = (id, name, mark) => {
 let PlayerCPU = (id, name, mark, difficulty) => {
     const prototype = Player (id, name, mark);
 
-    let makeMove = function () {
+    function availableMoves () {
         let gameBoard = GameBoard.getBoard();
+        let moves = [];
 
-        if (difficulty == "easy") {
-            let availableMoves = [];
-
-            for (let i=0; i < gameBoard.length; i++) {
-                for (let j=0; j < gameBoard[i].length; j++) {
-                    if (gameBoard[i][j] == '') {
-                        availableMoves.push([i,j]);
-                    }
+        for (let i=0; i < gameBoard.length; i++) {
+            for (let j=0; j < gameBoard[i].length; j++) {
+                if (gameBoard[i][j] == '') {
+                    moves.push([i,j]);
                 }
             }
+        }
 
-            let randomNum = Math.floor(Math.random() * availableMoves.length);
-            let selectRandomMove = availableMoves[randomNum];
+        return moves;
+    }
 
+    let makeMove = function () {
+        if (difficulty == "easy") {
+            let avalMoves = availableMoves();
+            let randomNum = Math.floor(Math.random() * avalMoves.length);
+            let selectRandomMove = avalMoves[randomNum];
             return selectRandomMove;
 
-        } else if (difficulty == "hard") {
-
+        } else if (difficulty == "unbeatable") {
+            let bestMove = maximin("cpu");
+            return bestMove;
         }
         
     }
+
+    function maximin(player) {
+        let gameBoard = GameBoard.getBoard();
+        let avalMoves = availableMoves();
+  
+
+        // check winner
+        let checkWinner; 
+        if (typeof Game.checkWinner('x') == "object") {
+            checkWinner = "player";
+        } else if (typeof Game.checkWinner('o') == "object") {
+            checkWinner = "cpu";
+        } else if (Game.checkWinner('x') == "tie" || Game.checkWinner('o') == "tie") {
+            checkWinner = "tie";
+        } else {
+            checkWinner = "none";
+        }
+
+        // give score
+        if (checkWinner == "player") {
+            return {score: -10};
+        } else if (checkWinner == "cpu") {
+            return {score: 10};
+        } else if (checkWinner = "tie") {
+            return {score: 0};
+        }
+
+        // store moves
+        let moves = [];
+        for (let i=0; i < avalMoves.length; i++) {
+            let move = {};
+            move.index = gameBoard[avalMoves[i]];
+            // gameBoard[availableMoves[i]] = 
+        }
+
+    }
+
+
 
     return Object.assign({}, prototype, {makeMove});
 }
